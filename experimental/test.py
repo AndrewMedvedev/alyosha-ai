@@ -1,19 +1,11 @@
-from ddgs import DDGS
+from docx2md import Converter, DocxFile, DocxMedia
 
-search_queries = [
-    'кейсы успешной автоматизации бизнеса авиакомпаний на решениях 1С',
-    "опыт интеграции системы учета авиаперевозок компанией 'ДИО-Консалт'",
-    'рекомендации экспертов по выбору поставщика IT-решений для авиакомпании',
-    'преимущества аутсорсинга автоматизации финансовых процессов авиакомпаний',
-    'примеры успешного сотрудничества компаний с услугами автоматизации на платформе 1С',
-    "отзывы пользователей о качестве работ компании 'ДИО-Консалт'"
-]
+docx_file = "НИР_Косов Андрей Сергеевич — 08.12.2025.docx"
 
-search_results: dict[str, list[dict[str, str]]] = {}
+docx = DocxFile(docx_file)
+media = DocxMedia(docx)
+media.save("media")
+converter = Converter(docx.document(), media, use_md_table=True)
+md_text = converter.convert()
 
-for search_query in search_queries:
-    results = DDGS().text(search_query, max_results=5)
-    search_results[search_query] = results
-
-
-print(search_results)
+print(md_text)

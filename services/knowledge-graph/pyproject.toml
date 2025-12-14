@@ -1,17 +1,16 @@
 [project]
-name = "experimental"
+name = "knowledge-graph"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
-    "docx2md>=1.0.4",
-    "fastapi[all]>=0.121.3",
-    "lxml>=6.0.2",
+    "aiofiles>=25.1.0",
+    "litestar>=2.18.0",
     "markdown-analysis>=0.1.5",
-    "mcp>=1.22.0",
-    "playwright>=1.56.0",
-    "pydantic>=2.12.4",
-    "pypandoc>=1.16.2",
+    "markitdown[all]>=0.1.4",
+    "mypy>=1.19.0",
+    "pydantic>=2.12.5",
+    "ruff>=0.14.9",
 ]
 
 [tool.ruff]
