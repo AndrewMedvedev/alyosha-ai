@@ -1,12 +1,10 @@
-from typing import Any, Self
-
 from uuid import UUID
 
-from pydantic import Field, PositiveInt, computed_field, model_validator
+from pydantic import Field, NonNegativeInt, computed_field
 
-from modules.shared_kernel.domain import AggregateRoot, CustomListPrimitive, Entity
+from modules.shared_kernel.domain import AggregateRoot, Entity
 
-from .value_objects import MessageRole
+from .value_objects import ContentBlock, MessageMetadata, MessageRole
 
 
 class Message(Entity):
@@ -14,48 +12,47 @@ class Message(Entity):
 
     Attributes:
         chat_id: Идентификатор чата.
-        role: Роль отправителя.
-        text: Текст сообщения.
-        attachments: Медиа вложения, содержит список медиа идентификаторов (file_id).
-        metadata: Дополнительные метаданные сообщения.
+        sender_id: Идентификатор отправителя сообщения (user_id или assistant_id).
+        role: Роль сообщения (`system`, `assistant`, `user`).
+        content_blocks: Блоки с контентом.
+        metadata: Метаданные сообщения.
     """
 
     chat_id: UUID
+    sender_id: UUID
     role: MessageRole
-    text: str
-    attachments: list[UUID] = Field(default_factory=list)
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    content_blocks: list[ContentBlock] = Field(default_factory=list)
+    metadata: MessageMetadata
 
 
-class Conversation(CustomListPrimitive[Message]):
-    """Текущий диалог ИИ с пользователем"""
+class Conversation(Entity):
+    """Текущая беседа с пользователем - N сообщений (например текущий день)"""
 
-    def to_markdown(self) -> str:
-        """Приводит последовательность сообщений в Markdown формат"""
+    title: str | None = None
+    messages: list[Message] = Field(default_factory=list)
 
-        if not self.data:
-            return ""
-        return "\n".join([
-            f"({i}) [{message.role}]: {message.text}"
-            for i, message in enumerate(self.data)
-        ])
+    @computed_field(description="Длина беседы")
+    def length(self) -> NonNegativeInt:
+        return len(self.messages)
+
+    def to_markdown(self) -> str: ...
 
 
 class Chat(AggregateRoot):
+    """Индивидуальная чат-сессия для каждого из пользователей.
+
+    Attributes:
+        workspace_id: Идентификатор рабочего пространства.
+        user_id: Идентификатор пользователя, для которого создана сессия.
+        title: Название чата (тема чата, может генерироваться AI).
+        description: Описание сути чата (для общего понимания контекста).
+        messages_count: Общее количество сообщений в чате.
+        conversation: Текущие сообщения в беседе (например на сегодняшний день).
+    """
+
+    workspace_id: UUID
     user_id: UUID
     title: str
-    messages_count: PositiveInt
-    conversation: Conversation = Field(default_factory=list)
-
-    @computed_field(description="Количество сообщений в текущем диалоге")
-    def conversation_length(self) -> PositiveInt:
-        return len(self.conversation)
-
-    @model_validator(mode="after")
-    def _validate_invariant(self) -> Self:
-        ...
-
-    @classmethod
-    def create(cls, user_id: UUID, title: str) -> Self: ...
-
-    def send_message(self, command: ...) -> ...: ...
+    description: str | None = None
+    messages_count: NonNegativeInt
+    conversation: Conversation
