@@ -20,6 +20,9 @@ class CreateEntryCommand(Command):
     )
     name: str = Field(..., description="Название модели", examples=["Gemma"])
     provider_name: str = Field(..., description="Провайдер модели", examples=["Google"])
+    source_url: str = Field(
+        default=None, description="URL источника", examples=["https://google.com"]
+    )
     description: str = Field(..., description="Описание модели с свободном формате")
     deployment_type: DeploymentType
     task: ModelTask

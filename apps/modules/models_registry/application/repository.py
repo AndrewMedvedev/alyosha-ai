@@ -1,10 +1,10 @@
 from abc import abstractmethod
 
-from modules.shared_kernel.application import CRUDRepository
+from modules.shared_kernel.application import CRUDRepository, Pagination
 
 from ..domain import ModelEntry
 
 
 class RegistryRepository(CRUDRepository[ModelEntry]):
     @abstractmethod
-    async def sort_by_usage_count(self) -> list[ModelEntry]: ...
+    async def get_most_popular(self, pagination: Pagination) -> list[ModelEntry]: ...

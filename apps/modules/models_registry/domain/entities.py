@@ -1,6 +1,6 @@
 from typing import Self
 
-from pydantic import Field, NonNegativeInt
+from pydantic import Field, HttpUrl, NonNegativeInt
 
 from modules.shared_kernel.domain import Entity
 
@@ -21,6 +21,7 @@ class ModelEntry(Entity):
     slug: ModelSlug
     name: str
     provider_name: str
+    source_url: HttpUrl | None = None
     description: str
     deployment_type: DeploymentType
     task: ModelTask
@@ -32,4 +33,4 @@ class ModelEntry(Entity):
 
     @classmethod
     def create(cls, command: CreateEntryCommand) -> Self:
-        return cls(**command.model_dump())
+        return cls.model_validate(command)
