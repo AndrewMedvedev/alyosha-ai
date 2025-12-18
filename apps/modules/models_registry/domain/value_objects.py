@@ -2,9 +2,14 @@ from typing import Literal
 
 from enum import StrEnum
 
-from pydantic import PositiveInt
+from pydantic import NonNegativeInt, PositiveInt
 
 from modules.shared_kernel.domain import ValueObject
+
+
+class LLMCategory(StrEnum):
+    OPEN_SOURCE = "open-source"
+    COMMERCIAL = "commercial"
 
 
 class DeploymentType(StrEnum):
@@ -12,6 +17,43 @@ class DeploymentType(StrEnum):
 
     LOCAL = "local"
     CLOUD = "cloud"
+
+
+class SizeType(StrEnum):
+    """Категории LLM по размеру.
+
+    Attributes:
+        TINY: Малые модели 1B-3B параметров.
+        SMALL: Маленькие модели 7B-14B параметров.
+        MEDIUM: Средние 20B-70B параметров.
+        LARGE: Большие 130B-400B+ параметров.
+    """
+
+    TINY = "tiny"
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
+
+
+class Rating(ValueObject):
+    """Рейтинг модели"""
+
+    count_of_usage: NonNegativeInt
+    stars: NonNegativeInt
+
+
+class TariffMethod(StrEnum):
+    """Метод тарификации облачных решений.
+
+    Attributes:
+        PAY_AS_YOU_GO: На основе токенов (оплата по факту использования).
+        SAAS: Подписка с фиксированной оплатой.
+        SPOT_INSTANCE: На основе инфраструктуры (почасовая оплата GPU).
+    """
+
+    PAY_AS_YOU_GO = "pay-as-you-go"
+    SAAS = "SaaS"
+    SPOT_INSTANCE = "spot-instance"
 
 
 class ModelCapability(StrEnum):
@@ -23,7 +65,6 @@ class ModelCapability(StrEnum):
     TRANSLATION = "translation"
     REASONING = "reasoning"
     SUMMARIZATION = "summarization"
-    MATH = "math"
 
 
 class ModelTask(StrEnum):
@@ -47,29 +88,14 @@ class ModelModality(StrEnum):
     MULTIMODAL = "multimodal"
 
 
-class ArchitectureType(StrEnum):
-    """Тип архитектуры модели"""
-
-    # Основные архитектуры трансформеров
-    TRANSFORMER = "transformer"
-    GPT = "gpt"
-    BERT = "bert"
-    T5 = "t5"
-    # Специализированные
-    MULTI_MODAL_TRANSFORMER = "multimodal-transformer"
-    CODE_SPECIFIC = "code-specific"
-
-
 class ModelSpecification(ValueObject):
     """Технические характеристики модели
 
     Attributes:
         params_count: Количество параметров.
-        architecture: Тип архитектуры.
         max_sequence_length: Максимальная длина контекста.
     """
 
     unit_of_params: Literal["M", "B"]
     params_count: PositiveInt
-    architecture: ArchitectureType
     max_sequence_length: PositiveInt
