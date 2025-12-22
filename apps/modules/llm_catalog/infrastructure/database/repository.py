@@ -1,13 +1,18 @@
 from typing import TypeVar
 
+from sqlalchemy import desc, select
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import selectinload
+
 from modules.shared_kernel.application import Pagination
+from modules.shared_kernel.application.exceptions import ReadingError
 from modules.shared_kernel.insrastructure.database import DataMapper, SQLAlchemyRepository
 
 from ...application import CatalogRepository
 from ...domain import AnyLLM, CommercialLLM, OpenSourceLLM
 from .models import BaseLLMModel, CommercialLLMModel, OpenSourceLLMModel, RatingModel
 
-AnyLLMModel = TypeVar("AnyLLMModel", bound=CommercialLLMModel | OpenSourceLLMModel)
+AnyLLMModel = TypeVar("AnyLLMModel", bound=BaseLLMModel | CommercialLLMModel | OpenSourceLLMModel)
 
 
 class LLMDataMapper(DataMapper[AnyLLM, AnyLLMModel]):
@@ -82,4 +87,25 @@ class SQLAlchemyCatalogRepository(SQLAlchemyRepository[AnyLLM, AnyLLMModel], Cat
     model = BaseLLMModel
     data_mapper = LLMDataMapper
 
-    async def get_most_popular(self, pagination: Pagination) -> list[AnyLLM]: ...
+    async def get_most_popular(self, pagination: Pagination) -> list[AnyLLM]:
+        try:
+            stmt = (
+                select(self.model)
+                .join(RatingModel, self.model.id == RatingModel.llm_id)
+                .options(selectinload(self.model.rating))
+                .order_by(desc(RatingModel.count_of_usage))
+                .offset(pagination.offset)
+                .limit(pagination.limit)
+            )
+            results = await self.session.execute(stmt)
+            models = results.scalars().all()
+            return [
+                self.data_mapper.model_to_entity(model) for model in models
+            ]
+        except SQLAlchemyError as e:
+            raise ReadingError(
+                entity_name="LLM",
+                entity_id="*",
+                details={**pagination.model_dump()},
+                original_error=e
+            ) from e

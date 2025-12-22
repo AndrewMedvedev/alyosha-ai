@@ -22,7 +22,7 @@ REQUIRED_ROLES_FOR_MODIFY_CATALOG = {
     path="",
     status_code=status.HTTP_201_CREATED,
     response_model=AnyLLM,
-    # dependencies=[Depends(require_user_roles(*REQUIRED_ROLES_FOR_MODIFY_CATALOG))],
+    dependencies=[Depends(require_user_roles(*REQUIRED_ROLES_FOR_MODIFY_CATALOG))],
     summary="Запись модели в каталог",
 )
 async def add_llm_to_catalog(
@@ -54,7 +54,7 @@ async def get_llm(llm_id: UUID, repository: FromDishka[CatalogRepository]) -> An
     llm = await repository.read(llm_id)
     if llm is None:
         raise NotFoundError(
-            f"LLM not found in registry by ID {llm_id}",
+            f"LLM not found in catalog by ID {llm_id}",
             entity_name="LLM",
             details={"llm_id": llm_id}
         )
