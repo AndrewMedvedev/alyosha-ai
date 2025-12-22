@@ -103,6 +103,6 @@ class SystemRequirements(ValueObject):
     """
 
     cpu: PositiveInt
-    ram: Decimal
-    vram: Decimal
-    ssd: Decimal
+    ram: PositiveInt
+    vram: PositiveInt
+    ssd: PositiveInt

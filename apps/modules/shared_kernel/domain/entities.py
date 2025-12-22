@@ -1,3 +1,5 @@
+from typing import TypeVar
+
 from abc import ABC
 from collections.abc import Iterator
 from datetime import datetime
@@ -18,22 +20,29 @@ class Entity(BaseModel, ABC):
 
     id: UUID = Field(default_factory=uuid4)
     created_at: datetime = Field(default_factory=current_datetime)
+    updated_at: datetime = Field(default_factory=current_datetime)
 
     def __hash__(self) -> int:
         return hash(self.id)
 
     def __eq__(self, other: "Entity") -> bool:
         """Сущности считаются эквивалентными если их id равны"""
+
         return self.id == other.id
 
     def _register_event(self, event: EventT) -> None:
         """Добавление нового доменного события"""
+
         self._events.append(event)
 
     def collect_events(self) -> Iterator[EventT]:
         """Собирает и возвращает все накопленные события"""
+
         while self._events:
             yield self._events.pop(0)
+
+
+EntityT = TypeVar("EntityT", bound=Entity)
 
 
 class AggregateRoot(Entity, ABC):

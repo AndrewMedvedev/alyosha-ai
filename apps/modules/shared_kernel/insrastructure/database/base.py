@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Final, TypeVar
 
 from collections.abc import AsyncIterator
 from datetime import datetime
@@ -38,6 +38,9 @@ class Base(AsyncAttrs, DeclarativeBase):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+ModelT = TypeVar("ModelT", bound=Base)
 
 
 async def session_factory() -> AsyncIterator[AsyncSession]:

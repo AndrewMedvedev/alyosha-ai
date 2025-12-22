@@ -6,6 +6,7 @@ __all__ = (
     "CustomListPrimitive",
     "CustomStrPrimitive",
     "Entity",
+    "EntityT",
     "ErrorType",
     "Event",
     "EventT",
@@ -18,7 +19,7 @@ __all__ = (
 )
 
 from .commands import Command, CommandT, Query, QueryT
-from .entities import AggregateRoot, Entity
+from .entities import AggregateRoot, Entity, EntityT
 from .event import Event, EventT
 from .exceptions import AppError, ErrorType, InvariantViolationError
 from .primitives import CustomListPrimitive, CustomStrPrimitive, IntPrimitive, StrPrimitive

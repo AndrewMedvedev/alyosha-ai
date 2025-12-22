@@ -8,7 +8,7 @@ from ..application import CreateWorkspaceUseCase, WorkspaceRepository
 from .database import SQLAlchemyWorkspaceRepository
 
 
-class AdminProvider(Provider):
+class WorkspaceProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def provide_workspace_repo(self, session: AsyncSession) -> WorkspaceRepository:  # noqa: PLR6301
         return SQLAlchemyWorkspaceRepository(session)

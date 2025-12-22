@@ -7,7 +7,7 @@ from pydantic import Field, HttpUrl, PositiveInt
 
 from modules.shared_kernel.domain import Entity
 
-from .commands import AddLLMToRegistryCommand
+from .commands import AddLLMToCatalogCommand
 from .primitives import ModelSlug
 from .value_objects import (
     LLMCategory,
@@ -71,7 +71,7 @@ class BaseLLM(Entity, ABC):
         return size_type
 
     @classmethod
-    def create(cls, command: AddLLMToRegistryCommand) -> Self:
+    def create(cls, command: AddLLMToCatalogCommand) -> Self:
         return cls.model_validate({
             **command.model_dump(),
             "size_type": cls._define_size_type(command.billion_params_count),

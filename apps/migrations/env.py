@@ -16,7 +16,7 @@ from modules.iam.infrastructure.database import (
     UserModel,
     SocialAccountModel,
 )
-from modules.models_registry.infrastructure.database import (
+from modules.llm_catalog.infrastructure.database import (
     BaseLLMModel,
     CommercialLLMModel,
     OpenSourceLLMModel,

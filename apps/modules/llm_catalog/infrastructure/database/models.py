@@ -8,6 +8,7 @@ from modules.shared_kernel.insrastructure.database import (
     DateTimeNull,
     JsonFieldNull,
     StrArray,
+    StrNull,
     StrText,
 )
 
@@ -33,7 +34,9 @@ class BaseLLMModel(Base):
     capabilities: Mapped[StrArray]
     modality: Mapped[str]
     target_domains: Mapped[StrArray]
-    rating: Mapped["RatingModel"] = relationship(back_populates="llm")
+    rating: Mapped["RatingModel"] = relationship(
+        back_populates="llm", cascade="all, delete-orphan", lazy="selectin"
+    )
 
 
 class RatingModel(Base):
@@ -56,4 +59,4 @@ class OpenSourceLLMModel(BaseLLMModel):
 class CommercialLLMModel(BaseLLMModel):
     __mapper_args__ = {"polymorphic_identity": "commercial"}  # noqa: RUF012
 
-    tariff_method: Mapped[str]
+    tariff_method: Mapped[StrNull]

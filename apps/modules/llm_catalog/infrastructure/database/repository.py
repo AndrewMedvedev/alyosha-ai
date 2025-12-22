@@ -3,9 +3,9 @@ from typing import TypeVar
 from modules.shared_kernel.application import Pagination
 from modules.shared_kernel.insrastructure.database import DataMapper, SQLAlchemyRepository
 
-from ...application import RegistryRepository
+from ...application import CatalogRepository
 from ...domain import AnyLLM, CommercialLLM, OpenSourceLLM
-from .models import CommercialLLMModel, OpenSourceLLMModel, RatingModel
+from .models import BaseLLMModel, CommercialLLMModel, OpenSourceLLMModel, RatingModel
 
 AnyLLMModel = TypeVar("AnyLLMModel", bound=CommercialLLMModel | OpenSourceLLMModel)
 
@@ -77,9 +77,9 @@ class LLMDataMapper(DataMapper[AnyLLM, AnyLLMModel]):
         return CommercialLLMModel(**values)
 
 
-class SQLAlchemyRegistryRepository(SQLAlchemyRepository[AnyLLM, AnyLLMModel], RegistryRepository):
+class SQLAlchemyCatalogRepository(SQLAlchemyRepository[AnyLLM, AnyLLMModel], CatalogRepository):
     entity = AnyLLM
-    model = AnyLLMModel
+    model = BaseLLMModel
     data_mapper = LLMDataMapper
 
-    async def get_most_popular(self, pagination: Pagination) -> list[...]: ...
+    async def get_most_popular(self, pagination: Pagination) -> list[AnyLLM]: ...

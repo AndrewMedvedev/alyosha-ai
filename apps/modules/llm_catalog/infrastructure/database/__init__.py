@@ -3,8 +3,8 @@ __all__ = (
     "CommercialLLMModel",
     "OpenSourceLLMModel",
     "RatingModel",
-    "SQLAlchemyRegistryRepository",
+    "SQLAlchemyCatalogRepository",
 )
 
 from .models import BaseLLMModel, CommercialLLMModel, OpenSourceLLMModel, RatingModel
-from .repository import SQLAlchemyRegistryRepository
+from .repository import SQLAlchemyCatalogRepository

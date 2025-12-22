@@ -13,7 +13,7 @@ from .value_objects import (
 )
 
 
-class AddLLMToRegistryCommand(Command):
+class AddLLMToCatalogCommand(Command):
     """Заполнение общих полей LLM для записи в каталог моделей"""
 
     slug: ModelSlug = Field(
@@ -42,17 +42,17 @@ class AddLLMToRegistryCommand(Command):
     )
 
 
-class AddOpenSourceLLMToRegistryCommand(AddLLMToRegistryCommand):
+class AddOpenSourceLLMToCatalogCommand(AddLLMToCatalogCommand):
     """Добавление open-source модели в общий каталог"""
 
     min_system_requirements: SystemRequirements
     recommended_system_requirements: SystemRequirements
 
 
-class AddCommercialLLMToRegistryCommand(AddLLMToRegistryCommand):
+class AddCommercialLLMToCatalogCommand(AddLLMToCatalogCommand):
     """Добавление коммерческой модели в общий каталог"""
 
     tariff_method: TariffMethod
 
 
-AddAnyLLMToRegistryCommand = AddCommercialLLMToRegistryCommand | AddOpenSourceLLMToRegistryCommand
+AddAnyLLMToCatalogCommand = AddCommercialLLMToCatalogCommand | AddOpenSourceLLMToCatalogCommand
