@@ -17,6 +17,7 @@ dependencies = [
     "faststream[rabbit]>=0.6.3",
     "filetype>=1.2.0",
     "langchain>=1.0.5",
+    "langchain-openai>=1.1.6",
     "langchain-text-splitters>=1.0.0",
     "mawo-pymorphy3>=1.0.4",
     "mutagen>=1.47.0",

@@ -1,4 +1,5 @@
 from enum import StrEnum
+from uuid import UUID
 
 from pydantic import HttpUrl
 
@@ -7,22 +8,27 @@ from modules.shared_kernel.domain import ValueObject
 DEFAULT_TEMPERATURE = 0.7
 
 
-class LLMProviderType(StrEnum):
-    """Тип провайдера LLM"""
+class IntegrationStatus(StrEnum):
+    """Статус подключенной LLM к рабочему пространству"""
 
-    OPENAI = "openai"
-    GIGACHAT = "gigachat"
-    YANDEX_CLOUD = "yandex-cloud"
-    LOCAL = "local"
+    PENDING = "pending"
+    ACTIVE = "active"
+    DISABLED = "disabled"
+    ERROR = "error"
+    TESTING = "testing"
 
 
-class ModelConfiguration(ValueObject):
+class Provider(StrEnum):
+    GIGACHAT = "GigaChat"
+    YANDEX_CLOUD = "YandexCloud"
+    OPENAI = "OpenAI"
+
+
+class IntegrationConfig(ValueObject):
     """Конфигурация модели"""
 
-    provider_name: str
-    provider_type: LLMProviderType
-    apikey: str | None = None
-    project: str | None = None
+    credentials_id: UUID
+    provider: Provider
     model_name: str
     base_url: HttpUrl | None = None
     temperature: float = DEFAULT_TEMPERATURE

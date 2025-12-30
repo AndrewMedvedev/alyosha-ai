@@ -2,23 +2,21 @@ from uuid import UUID
 
 from pydantic import Field
 
-from modules.shared_kernel.domain import AggregateRoot, Entity
+from modules.shared_kernel.domain import Entity
 
-from .value_objects import ModelConfiguration
+from .value_objects import IntegrationConfig, IntegrationStatus
 
 
-class ModelsRegistry(AggregateRoot):
-    """Заготовленные и пред-настроенные модели"""
+class LLMIntegration(Entity):
+    workspace_id: UUID
+    name: str
+    description: str | None = None
+    status: IntegrationStatus
+    config: IntegrationConfig
 
 
 class Assistant(Entity):
     workspace_id: UUID
     name: str
     system_prompt: str
-    model_configuration: ModelConfiguration
     connected_agents: list[UUID] = Field(default_factory=list)
-
-    def configure_model(self, configuration: ModelConfiguration) -> None:
-        self.model_configuration = configuration
-
-    def connect_agent(self) -> ...: ...
