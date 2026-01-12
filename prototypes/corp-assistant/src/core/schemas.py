@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Literal, Self
 
 from datetime import datetime
 from pathlib import Path
@@ -9,7 +9,16 @@ from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, PositiveInt
 
 from ..settings import TIMEZONE
 from ..utils import current_datetime
-from .enums import TaskStatus
+from .enums import TaskStatus, UserRole
+
+OutputDocumentExt = Literal["pdf", "docx"]
+
+
+class User(BaseModel):
+    user_id: PositiveInt
+    username: str | None = None
+    role: UserRole
+    created_at: datetime = Field(default_factory=current_datetime)
 
 
 class File(BaseModel):
@@ -53,8 +62,12 @@ class AudioSegment(BaseModel):
     duration_ms: PositiveInt
 
     @property
+    def is_first(self) -> bool:
+        return self.serial_number == 0
+
+    @property
     def is_last(self) -> bool:
-        return self.serial_number == self.total_count
+        return self.serial_number == self.total_count - 1
 
 
 class AudioRecognitionTask(BaseModel):
@@ -65,7 +78,8 @@ class AudioRecognitionTask(BaseModel):
     updated_at: datetime = Field(default_factory=current_datetime)
     finished_at: datetime | None = None
     status: TaskStatus
+    output_document_ext: OutputDocumentExt = "docx"
     recognition_results: list[str] = Field(default_factory=list)
 
-    def change_status(self, status: TaskStatus) -> Self:
+    def change_status(self, status: TaskStatus) -> None:
         self.status = status

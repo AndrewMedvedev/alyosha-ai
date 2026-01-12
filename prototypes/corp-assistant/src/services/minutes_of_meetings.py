@@ -8,6 +8,7 @@ from pydub.utils import make_chunks
 
 from ..broker import broker
 from ..core import enums, events, schemas
+from ..utils import create_docx_from_markdown, create_pdf_from_markdown
 from . import media as media_service
 
 logger = logging.getLogger(__name__)
@@ -33,8 +34,12 @@ def _split_audio_on_segments(
         )
 
 
-async def create_task(user_id: int, file_ids: list[UUID]) -> ...:
-    task = schemas.AudioRecognitionTask(status=enums.TaskStatus.PENDING)
+async def create_task(
+        user_id: int, file_ids: list[UUID], output_document_ext: schemas.OutputDocumentExt
+) -> ...:
+    task = schemas.AudioRecognitionTask(
+        status=enums.TaskStatus.PENDING, output_document_ext=output_document_ext
+    )
     for file_id in file_ids:
         file = await media_service.download(file_id)
         for audio_segment in _split_audio_on_segments(
@@ -44,3 +49,11 @@ async def create_task(user_id: int, file_ids: list[UUID]) -> ...:
                 task_id=task.id, user_id=user_id, audio_segment=audio_segment
             )
             await broker.publish(event, channel="audio:recognize")
+
+
+def create_document(md_text: str, output_document_ext: schemas.OutputDocumentExt) -> bytes:
+    match output_document_ext:
+        case "docx":
+            return create_docx_from_markdown(md_text)
+        case "pdf":
+            return create_pdf_from_markdown(md_text)
