@@ -102,7 +102,7 @@ async def draw_up_minutes_of_meeting(
 
 model = ChatOpenAI(
     api_key=settings.yandexcloud.apikey,
-    model=settings.yandexcloud.aliceai_llm,
+    model=settings.yandexcloud.qwen3_235b,
     base_url=settings.yandexcloud.base_url,
     temperature=0.5,
     max_retries=3

@@ -30,6 +30,8 @@ class Attachment(Base):
 class AudioRecognitionTask(Base):
     __tablename__ = "audio_recognition_tasks"
 
-    finished_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     status: Mapped[str]
+    max_speakers_count: Mapped[int]
+    output_document_ext: Mapped[str]
     recognition_results: Mapped[list[str]] = mapped_column(ARRAY(String))

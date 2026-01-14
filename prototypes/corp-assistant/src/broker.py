@@ -7,9 +7,16 @@ from .database import crud, models
 from .integrations import salute_speech
 from .services import minutes_of_meetings
 from .settings import settings
-from .utils import current_datetime
+from .utils import current_datetime, escape_md2
 
-broker = RedisBroker(settings.redis.url)
+broker = RedisBroker(
+    settings.redis.url,
+    socket_timeout=120.0,
+    socket_connect_timeout=15.0,
+    socket_keepalive=True,
+    retry_on_timeout=True,
+    health_check_interval=15
+)
 
 app = FastStream(broker)
 
@@ -20,7 +27,7 @@ async def handle_audio_recognize_event(event: events.AudioRecognize, logger: Log
 
     if event.audio_segment.is_first:
         await bot.send_message(
-            chat_id=event.user_id, text="Транскрибация вашей аудиозаписи началась..."
+            chat_id=event.user_id, text=escape_md2("Транскрибация вашей аудиозаписи началась...")
         )
     current_task = await crud.read(
         event.task_id,
@@ -49,9 +56,9 @@ async def handle_audio_recognize_event(event: events.AudioRecognize, logger: Log
         )
         await bot.send_message(
             chat_id=event.user_id,
-            text="""Транскрибация вашей аудиозаписи завершена.
+            text=escape_md2("""Транскрибация вашей аудиозаписи завершена.
             Начинаю составлять протокол ...
-            """
+            """)
         )
 
 

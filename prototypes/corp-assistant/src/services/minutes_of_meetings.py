@@ -11,6 +11,7 @@ from pydub.utils import make_chunks
 from .. import utils
 from ..broker import broker
 from ..core import enums, events, schemas
+from ..database import crud, models
 from ..settings import PROMPTS_DIR, settings
 from . import media
 
@@ -77,6 +78,7 @@ async def create_task(
         max_speakers_count=participants_count,
         output_document_ext=output_document_ext
     )
+    await crud.create(task, model_class=models.AudioRecognitionTask)
     for attachment in attachments:
         file = await media.download(attachment.id)
         for audio_segment in _split_audio_on_segments(

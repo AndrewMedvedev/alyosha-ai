@@ -26,7 +26,7 @@ async def authenticate(use_ssl: bool = False) -> str:
         "Authorization": f"Bearer {settings.sber_devices.apikey}",
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json",
-        "RqUID": rq_uid,
+        "RqUID": f"{rq_uid}",
     }
     payload = {"scope": settings.sber_devices.scope}
     try:

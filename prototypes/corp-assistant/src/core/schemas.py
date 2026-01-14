@@ -73,24 +73,21 @@ class Attachment(BaseModel):
 
 class AudioSegment(BaseModel):
     serial_number: NonNegativeInt
-    total_count: NonNegativeInt
+    total_count: PositiveInt
     data: bytes
     size: PositiveInt
     format: str
     duration_ms: PositiveInt
 
     @field_serializer("data")
-    def serialize_data(self, v: bytes) -> str:  # noqa: PLR6301
-        return base64.b64encode(v).decode("ascii")
+    def serialize_data(self, data: bytes) -> str:  # noqa: PLR6301
+        return base64.b64encode(data).decode("utf-8")
 
     @field_validator("data", mode="before")
-    @classmethod
-    def decode_data(cls, v):
-        if isinstance(v, str):
-            return base64.b64decode(v)
-        if isinstance(v, bytes):
-            return v
-        raise ValueError("Audio segment data should be base64 string or bytes")
+    def decode_data(cls, data: str | bytes) -> bytes:
+        if isinstance(data, str):
+            return base64.b64decode(data)
+        return data
 
     @property
     def is_first(self) -> bool:

@@ -21,6 +21,21 @@ services:
     restart: unless-stopped
     volumes:
       - redis_data:/data
+    command:
+      - redis-server
+      - --protected-mode no
+      - --client-output-buffer-limit
+      - "pubsub 64mb 32mb 120"
+      - --maxmemory
+      - 2gb
+      - --maxmemory-policy
+      - allkeys-lru
+      - --loadmodule
+      - /opt/redis-stack/lib/redisearch.so
+      - --loadmodule
+      - /opt/redis-stack/lib/rejson.so
+      - --loadmodule
+      - /opt/redis-stack/lib/redistimeseries.so
     ports:
       - "${REDIS_PORT}:6379"
     healthcheck:
