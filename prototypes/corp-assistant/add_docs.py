@@ -15,7 +15,8 @@ def main() -> None:
         doc_file = doc_path.read_bytes()
         md_text = convert_document_to_md(doc_file, file_extension=doc_path.suffix)
         rag_pipeline.indexing(
-            text=md_text, metadata={"source": doc_path.name, "category": "Коммерческие предложения"}
+            text=md_text,
+            metadata={"source": doc_path.name, "category": "Коммерческие предложения"}
         )
 
 

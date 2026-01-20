@@ -1,14 +1,14 @@
 services:
-  telegram-bot-api:
-    image: aiogram/telegram-bot-api:latest
-    environment:
-      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
-      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
-      TELEGRAM_LOCAL: "true"
-    volumes:
-      - telegram-bot-api-data:/var/lib/telegram-bot-api
-    ports:
-      - "8081:8081"
+#  telegram-bot-api:
+#    image: aiogram/telegram-bot-api:latest
+#    environment:
+#      TELEGRAM_API_ID: ${TELEGRAM_API_ID}
+#      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH}
+#      TELEGRAM_LOCAL: "true"
+#    volumes:
+#      - telegram-bot-api-data:/var/lib/telegram-bot-api
+#    ports:
+#      - "8081:8081"
 
   postgres:
     image: postgres:16.9
@@ -58,6 +58,6 @@ services:
 
 
 volumes:
-  telegram-bot-api-data:
+  # telegram-bot-api-data:
   postgres_data:
   redis_data:

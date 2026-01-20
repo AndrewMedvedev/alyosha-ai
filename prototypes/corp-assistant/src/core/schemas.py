@@ -12,7 +12,6 @@ DocumentExt = Literal[".pdf", ".docx", ".md"]
 
 class UserRole(StrEnum):
     ADMIN = "admin"
-    MODERATOR = "moderator"
     USER = "user"
 
 

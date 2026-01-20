@@ -80,7 +80,6 @@ class RAGPipeline:
             **Document-ID:** {id_}
             **Relevance score:** {round(distance, 2)}
             **Source:** {metadata.get('source', '')}
-            **Category:** {metadata.get('category', '')}
             **Document:**
             {document}
             """

@@ -313,7 +313,7 @@ async def recognize_async(
         audio_data: bytes,
         audio_encoding: AudioEncoding,
         channels: int = 1,
-        max_speakers_count: int = 10,
+        max_speakers: int = 10,
         interval: int = 1,
         use_ssl: bool = False,
 ) -> str:
@@ -328,7 +328,7 @@ async def recognize_async(
         request_file_id,
         audio_encoding=audio_encoding,
         channels=channels,
-        max_speakers_count=max_speakers_count,
+        max_speakers=max_speakers,
         use_ssl=use_ssl,
     )
     while task["status"] != "DONE":

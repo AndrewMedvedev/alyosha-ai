@@ -1,6 +1,5 @@
 import io
 import json
-import re
 from datetime import datetime
 
 from markitdown import MarkItDown
@@ -21,16 +20,16 @@ def audio_mime_to_ext(mime_type: str) -> str:
     return mime_to_ext_map[mime_type]
 
 
-def convert_document_to_md(file_data: bytes, file_extension: str) -> str:
+def convert_document_to_md(data: bytes, extension: str) -> str:
     """Конвертирует контент документа (.pptx, .pdf, .docx, .xlsx) в Markdown текст.
 
-    :param file_data: Байты исходного документа.
-    :param file_extension: Расширение документа, например: .pdf, .docx, .xlsx
+    :param data: Байты исходного документа.
+    :param extension: Расширение документа, например: .pdf, .docx, .xlsx
     :returns: Markdown текст.
     """
 
     md = MarkItDown()
-    result = md.convert_stream(io.BytesIO(file_data), file_extension=file_extension)
+    result = md.convert_stream(io.BytesIO(data), file_extension=extension)
     return result.text_content
 
 

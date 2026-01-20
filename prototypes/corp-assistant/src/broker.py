@@ -62,7 +62,7 @@ def split_audio_into_segments(
 
 
 async def update_progress(
-        bot: Bot, chat_id: int, percent: float, previous_message_id: int | None = None
+        bot: Bot, chat_id: int, percent: float, prev_message_id: int | None = None
 ) -> Message:
     """Обновляет сообщение с прогрессом расшифровки аудио записи"""
 
@@ -71,7 +71,7 @@ async def update_progress(
     {progress_emojis(percent)}
     <b>{percent:.1f}%</b>
     """
-    await bot.delete_message(chat_id=chat_id, message_id=previous_message_id)
+    await bot.delete_message(chat_id=chat_id, message_id=prev_message_id)
     return await bot.send_message(chat_id=chat_id, text=text)
 
 
@@ -85,7 +85,8 @@ async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> Non
     )
     transcription_segments: list[str] = []
     for audio_path in task.audio_paths:
-        audio_data = await bot.download_file(audio_path, destination=io.BytesIO())
+        file_buffer = await bot.download_file(audio_path, destination=io.BytesIO())
+        audio_data = file_buffer.getbuffer().tobytes()
         mime_type = magic.Magic(mime=True).from_buffer(audio_data)
         for audio_segment in split_audio_into_segments(
                 audio_data, audio_format=audio_mime_to_ext(mime_type)
@@ -94,7 +95,7 @@ async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> Non
                 bot=bot,
                 chat_id=task.user_id,
                 percent=audio_segment.index + 1 / audio_segment.segments_count,
-                previous_message_id=bot_message.message_id
+                prev_message_id=bot_message.message_id
             )
             logger.info(
                 "Recognizing %s segment of audio file %s", audio_segment.index + 1, audio_path

@@ -1,5 +1,6 @@
 from ..core import schemas
 from ..database import crud, models
+from ..settings import settings
 
 
 async def get(user_id: int) -> schemas.User | None:
@@ -22,3 +23,7 @@ async def save(
     )
     await crud.create(user, model_class=models.User)
     return user
+
+
+def is_admin(user_id: int) -> bool:
+    return user_id == settings.telegram.bot_admin_id

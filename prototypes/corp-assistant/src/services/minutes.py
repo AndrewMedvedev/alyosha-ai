@@ -28,7 +28,7 @@ async def create_minutes_task(
 
     audio_paths: list[str] = []
     for file_id in file_ids:
-        file = await bot.get_file(file_id)
+        file = await bot.get_file(file_id, request_timeout=300)
         file_format = file.file_path.split(".")[-1]
         if file_format not in SUPPORTED_AUDIO_FORMATS:
             logger.warning("Not supported audio format: %s!", file_format)

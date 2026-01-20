@@ -24,6 +24,7 @@ class TelegramSettings(BaseSettings):
     api_hash: str = "<API HASH>"
     api_port: int = 8081
     api_host: str = "localhost"
+    bot_admin_id: int = -1
 
     @property
     def api_url(self) -> str:
