@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка документов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 15px;
+        }
+
+        .form-container {
+            padding: 32px 24px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #666;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .step-line {
+            position: absolute;
+            top: 20px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .step-line-fill {
+            position: absolute;
+            top: 20px;
+            left: 20%;
+            width: 0%;
+            height: 4px;
+            background: #667eea;
+            transition: width 0.5s ease;
+            z-index: 1;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .category-select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 20px;
+        }
+
+        .category-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 16px;
+            padding: 40px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            background: #edf0ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            background: #e3e8ff;
+            border-color: #4CAF50;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 28px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 24px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 16px;
+            font-weight: 700;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .file-remove {
+            color: #ff4757;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .file-remove:hover {
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 32px;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 24px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #4CAF50 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px 24px;
+            display: none;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            margin: 0 auto 24px;
+        }
+
+        .progress-container {
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 16px;
+            }
+
+            .header {
+                padding: 24px 16px;
+            }
+
+            .form-container {
+                padding: 24px 16px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 Загрузка документов</h1>
+            <p>Выберите категорию и добавьте файлы</p>
+        </div>
+
+        <div class="form-container">
+            <!-- Индикатор шагов -->
+            <div class="step-indicator">
+                <div class="step-line"></div>
+                <div class="step-line-fill" id="stepLineFill"></div>
+                <div class="step active" id="step1">1</div>
+                <div class="step" id="step2">2</div>
+                <div class="step" id="step3">3</div>
+            </div>
+
+            <!-- Шаг 1: Выбор категории -->
+            <div class="step-content active" id="stepContent1">
+                <div class="input-group">
+                    <label for="category">Категория документов</label>
+                    <select id="category" class="category-select" required>
+                        <option value="" disabled selected>Выберите категорию</option>
+                        <option value="finance">💰 Финансовые документы</option>
+                        <option value="legal">⚖️ Юридические документы</option>
+                        <option value="hr">👥 HR и кадровые</option>
+                        <option value="technical">🔧 Техническая документация</option>
+                        <option value="marketing">📈 Маркетинг и аналитика</option>
+                        <option value="other">📁 Другое</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="description">Описание (необязательно)</label>
+                    <textarea id="description"
+                              class="category-select"
+                              placeholder="Добавьте краткое описание для этой группы документов..."
+                              rows="3"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <div></div> <!-- Пустой элемент для выравнивания -->
+                    <button class="btn btn-primary" onclick="nextStep()">Далее →</button>
+                </div>
+            </div>
+
+            <!-- Шаг 2: Выбор файлов -->
+            <div class="step-content" id="stepContent2">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" class="file-input" multiple>
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">Перетащите файлы сюда</div>
+                    <div class="upload-subtext">или нажмите для выбора файлов</div>
+                    <div class="upload-subtext">Поддерживаемые форматы: PDF, DOC, XLS, JPG, PNG, ZIP (до 50 МБ)</div>
+                </div>
+
+                <div class="file-list" id="fileList">
+                    <!-- Файлы будут появляться здесь -->
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Назад</button>
+                    <button class="btn btn-primary" id="uploadBtn" onclick="uploadFiles()" disabled>Загрузить файлы</button>
+                </div>
+            </div>
+
+            <!-- Шаг 3: Загрузка и завершение -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    <div class="success-icon">✓</div>
+                    <h2 style="margin-bottom: 16px; color: #333;">✅ Загрузка завершена!</h2>
+                    <p style="color: #666; margin-bottom: 24px;">
+                        Документы успешно загружены в категорию
+                        <strong id="uploadedCategory"></strong>
+                    </p>
+                    <button class="btn btn-secondary" onclick="resetForm()">Загрузить ещё</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 3;
+        let selectedFiles = [];
+        let selectedCategory = '';
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUpload();
+            updateStepIndicator();
+
+            // Обновляем кнопку загрузки при выборе файлов
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+            // Обновляем категорию при изменении
+            document.getElementById('category').addEventListener('change', function() {
+                selectedCategory = this.options[this.selectedIndex].text;
+            });
+        });
+
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            // Клик по области
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Drag and Drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+        }
+
+        function handleFileSelect(e) {
+            handleFiles(e.target.files);
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (validateFile(file)) {
+                    selectedFiles.push(file);
+                    addFileToList(file);
+                }
+            });
+
+            // Активируем кнопку загрузки, если есть файлы
+            document.getElementById('uploadBtn').disabled = selectedFiles.length === 0;
+
+            // Обновляем индикатор количества файлов
+            updateFileCounter();
+        }
+
+        function validateFile(file) {
+            const maxSize = 50 * 1024 * 1024; // 50 МБ
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'image/jpeg',
+                'image/png',
+                'application/zip'
+            ];
+
+            if (file.size > maxSize) {
+                alert(`Файл "${file.name}" слишком большой. Максимальный размер: 50 МБ`);
+                return false;
+            }
+
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|xls|xlsx|jpg|jpeg|png|zip)$/i)) {
+                alert(`Файл "${file.name}" имеет неподдерживаемый формат`);
+                return false;
+            }
+
+            return true;
+        }
+
+        function addFileToList(file) {
+            const fileList = document.getElementById('fileList');
+            const fileId = Date.now() + Math.random();
+
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.dataset.id = fileId;
+
+            // Определяем иконку по типу файла
+            let fileIcon = '📄';
+            if (file.type.includes('image')) fileIcon = '🖼️';
+            else if (file.type.includes('pdf')) fileIcon = '📕';
+            else if (file.type.includes('word')) fileIcon = '📝';
+            else if (file.type.includes('excel')) fileIcon = '📊';
+            else if (file.type.includes('zip')) fileIcon = '📦';
+
+            fileItem.innerHTML = `
+                <div class="file-icon">${fileIcon}</div>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+                <div class="file-remove" onclick="removeFile('${fileId}')">🗑️</div>
+            `;
+
+            fileList.appendChild(fileItem);
+        }
+
+        function removeFile(fileId) {
+            // Удаляем из DOM
+            const fileItem = document.querySelector(`[data-id="${fileId}"]`);
+            if (fileItem) {
+                fileItem.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => fileItem.remove(), 300);
+            }
+
+            // Удаляем из массива (упрощенно)
+            selectedFiles = selectedFiles.filter((_, index) => {
+                const itemId = document.querySelectorAll('.file-item')[index]?.dataset.id;
+                return itemId !== fileId;
+            });
+
+            // Обновляем кнопку
+            document.getElementById('uploadBtn').disabled = selectedFiles.length === 0;
+            updateFileCounter();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateFileCounter() {
+            const uploadText = document.querySelector('.upload-text');
+            if (selectedFiles.length > 0) {
+                uploadText.textContent = `Выбрано файлов: ${selectedFiles.length}`;
+            } else {
+                uploadText.textContent = 'Перетащите файлы сюда';
+            }
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                const category = document.getElementById('category').value;
+                if (!category) {
+                    alert('Пожалуйста, выберите категорию');
+                    return;
+                }
+                selectedCategory = document.getElementById('category').options[document.getElementById('category').selectedIndex].text;
+            }
+
+            if (currentStep < totalSteps) {
+                document.getElementById(`stepContent${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+
+                currentStep++;
+
+                document.getElementById(`stepContent${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateStepIndicator();
+
+                // Показываем прогресс на последнем шаге
+                if (currentStep === 3) {
+                    document.getElementById('progressContainer').classList.add('active');
+                    document.querySelector('.progress-bar').style.display = 'block';
+                    simulateUpload();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`stepContent${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+
+                currentStep--;
+
+                document.getElementById(`stepContent${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateStepIndicator();
+            }
+        }
+
+        function updateStepIndicator() {
+            const fillPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('stepLineFill').style.width = `${fillPercentage}%`;
+
+            // Обновляем статус шагов
+            for (let i = 1; i <= totalSteps; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('completed');
+                if (i < currentStep) {
+                    step.classList.add('completed');
+                }
+            }
+        }
+
+        function simulateUpload() {
+            const progressFill = document.getElementById('progressFill');
+            const successMessage = document.getElementById('successMessage');
+            const uploadedCategory = document.getElementById('uploadedCategory');
+
+            uploadedCategory.textContent = selectedCategory;
+
+            // Симуляция загрузки
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) {
+                    progress = 100;
+                    clearInterval(interval);
+
+                    // Показываем сообщение об успехе
+                    setTimeout(() => {
+                        successMessage.style.display = 'block';
+                        document.querySelector('.progress-bar').style.display = 'none';
+                    }, 500);
+                }
+                progressFill.style.width = `${progress}%`;
+            }, 200);
+        }
+
+        function uploadFiles() {
+            if (selectedFiles.length === 0) {
+                alert('Пожалуйста, выберите файлы для загрузки');
+                return;
+            }
+
+            nextStep();
+        }
+
+        function resetForm() {
+            // Сброс формы
+            currentStep = 1;
+            selectedFiles = [];
+            selectedCategory = '';
+
+            // Сброс DOM
+            document.getElementById('stepContent3').classList.remove('active');
+            document.getElementById('stepContent2').classList.remove('active');
+            document.getElementById('stepContent1').classList.add('active');
+
+            document.getElementById('step3').classList.remove('active', 'completed');
+            document.getElementById('step2').classList.remove('active', 'completed');
+            document.getElementById('step1').classList.add('active');
+
+            document.getElementById('progressContainer').classList.remove('active');
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+
+            document.getElementById('category').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('fileList').innerHTML = '';
+            document.getElementById('uploadBtn').disabled = true;
+            document.querySelector('.upload-text').textContent = 'Перетащите файлы сюда';
+
+            updateStepIndicator();
+        }
+
+        // Интеграция с Telegram Web App
+        function initTelegramWebApp() {
+            if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+                const webApp = Telegram.WebApp;
+
+                // Расширяем на весь экран
+                webApp.expand();
+
+                // Меняем цвет кнопки
+                webApp.setHeaderColor('#667eea');
+                webApp.setBackgroundColor('#667eea');
+
+                // Обработчик основной кнопки
+                webApp.MainButton.setText('Загрузить файлы')
+                    .show()
+                    .onClick(uploadFiles);
+
+                // Обновляем кнопку при выборе файлов
+                const updateMainButton = () => {
+                    if (selectedFiles.length > 0) {
+                        webApp.MainButton.setText(`Загрузить ${selectedFiles.length} файлов`)
+                            .enable();
+                    } else {
+                        webApp.MainButton.disable();
+                    }
+                };
+
+                // Слушаем выбор файлов
+                document.getElementById('fileInput').addEventListener('change', updateMainButton);
+            }
+        }
+
+        // Инициализируем Telegram Web App при загрузке
+        window.addEventListener('load', initTelegramWebApp);
+    </script>
+</body>
+</html>

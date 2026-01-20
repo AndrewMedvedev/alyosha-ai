@@ -50,14 +50,6 @@ def rag_search(search_query: str, source: str | None = None, n_results: int = 10
     return "\n\n".join(documents)
 
 
-""""@tool(
-    "make_commercial_offer",
-    description="",
-    args_schema=...,
-)
-async def make_commercial_offer(): ..."""
-
-
 model = ChatOpenAI(
     api_key=settings.yandexcloud.apikey,
     model=settings.yandexcloud.qwen3_235b,

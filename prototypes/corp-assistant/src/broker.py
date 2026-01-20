@@ -7,14 +7,16 @@ from aiogram import Bot
 from aiogram.types import BufferedInputFile, Message
 from faststream import FastStream, Logger
 from faststream.redis import RedisBroker
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
 from pydub import AudioSegment
 from pydub.utils import make_chunks
 
 from .core import schemas
 from .integrations import salute_speech
-from .services.minutes import generate_meeting_minutes
-from .settings import settings
-from .utils import audio_mime_to_ext, current_datetime, progress_emojis
+from .settings import PROMPTS_DIR, settings
+from .utils import audio_mime_to_ext, current_datetime, md_to_pdf, progress_emojis
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,8 @@ broker = RedisBroker(
 )
 
 app = FastStream(broker)
+
+MEETING_MINUTES_PROMPT = (PROMPTS_DIR / "meeting_minutes_prompt.md").read_text(encoding="utf-8")
 
 
 def split_audio_into_segments(
@@ -75,6 +79,25 @@ async def update_progress(
     return await bot.send_message(chat_id=chat_id, text=text)
 
 
+async def generate_meeting_minutes(transcription: str) -> str:
+    """Генерирует протокол совещания по его транскрибации.
+
+    :param transcription: Транскрибация совещания.
+    :returns: Составленный протокол в Markdown формате.
+    """
+
+    model = ChatOpenAI(
+        api_key=settings.yandexcloud.apikey,
+        model=settings.yandexcloud.qwen3_235b,
+        base_url=settings.yandexcloud.base_url,
+        temperature=0.2,
+        max_retries=3,
+    )
+    prompt = ChatPromptTemplate.from_template(MEETING_MINUTES_PROMPT)
+    chain = prompt | model | StrOutputParser()
+    return await chain.ainvoke({"transcription": transcription})
+
+
 @broker.subscriber("minutes:draw_up")
 async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> None:
     from .bot import bot  # noqa: PLC0415
@@ -112,14 +135,13 @@ async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> Non
         chat_id=task.user_id,
         text="Всё распознано! 🎤\nФормирую протокол совещания… ✍️\nЭто займёт ещё 30–90 секунд",
     )
-    minutes_md = await generate_meeting_minutes(full_transcription)
-    md_file = io.BytesIO()
-    md_file.write(minutes_md.encode("utf-8"))
-    md_file.seek(0)
+    md_content = await generate_meeting_minutes(full_transcription)
+    md_content = md_content.replace("```", "").replace("markdown", "")
+    pdf_file = md_to_pdf(md_content)
     await bot.send_document(
         chat_id=task.user_id, document=BufferedInputFile(
-            file=md_file.getvalue(),
-            filename=f"Прокол_совещания_{current_datetime()}.md"
+            file=pdf_file,
+            filename=f"Прокол_совещания_{current_datetime()}.pdf"
         ),
         caption="Готово! 🎉"
     )

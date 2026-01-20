@@ -7,8 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, PositiveInt
 
 from ..utils import current_datetime
 
-DocumentExt = Literal[".pdf", ".docx", ".md"]
-
 
 class UserRole(StrEnum):
     ADMIN = "admin"
@@ -26,15 +24,9 @@ class User(BaseModel):
     created_at: datetime = Field(default_factory=current_datetime)
 
 
-class File(BaseModel):
-    path: str
-    size: PositiveInt
-    mime_type: str
-    extension: str
-    data: bytes
-
-
 class AudioSegment(BaseModel):
+    """Часть аудио записи"""
+
     index: NonNegativeInt
     segments_count: PositiveInt
     data: bytes
@@ -57,4 +49,4 @@ class MinutesTask(BaseModel):
     audio_paths: list[str]
     user_id: PositiveInt
     max_speakers: PositiveInt
-    document_ext: DocumentExt = ".docx"
+    output_format: Literal["pdf", "docx", "md"] = "docx"
