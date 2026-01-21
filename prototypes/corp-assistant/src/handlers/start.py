@@ -6,8 +6,14 @@ from ..core import schemas
 from ..database import crud, models
 from ..keyboards import get_admin_menu_kb
 from ..service import is_admin
+from ..settings import settings
 
 router = Router(name=__name__)
+
+WELCOME_MESSAGE = f"""Добрый день,
+я ваш корпоративный ассистент - <b>{settings.assistant.name}</b>.
+Я могу составить протокол совещания, а также найти ответ на вопрос по внутренней документации.
+"""
 
 
 @router.message(CommandStart())
@@ -24,7 +30,7 @@ async def cmd_start(message: Message) -> None:
                 role=schemas.UserRole.ADMIN,
             )
             await crud.create(admin, model_class=models.User)
-        await message.reply("Админ панель", reply_markup=get_admin_menu_kb(user_id))
+        await message.reply(WELCOME_MESSAGE, reply_markup=get_admin_menu_kb(user_id))
         return
     user = await crud.read(user_id, model_class=models.User, schema_class=schemas.User)
     if user is None:
@@ -35,4 +41,5 @@ async def cmd_start(message: Message) -> None:
             last_name=message.from_user.last_name,
             role=schemas.UserRole.USER,
         )
-    await message.reply(f"Добро пожаловать <b>{user.fist_name}</b>")
+        await crud.create(user, model_class=models.User)
+    await message.reply(WELCOME_MESSAGE)

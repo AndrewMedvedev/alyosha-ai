@@ -54,11 +54,11 @@ async def process_audio(message: Message, state: FSMContext) -> None:
             message.from_user.username, message.voice.duration
         )
     else:
-        await message.answer("❌ Пожалуйста, отправьте аудио файл или голосовое сообщение")
+        await message.answer("❌ Пожалуйста, отправьте аудио файл или голосовое сообщение!")
         return
     await state.update_data(file_id=file_id)
     await message.answer(
-        text="Выберите файл в котором вам удобнее получить протокол",
+        text="Выберите формат в котором вам будет удобнее получить протокол",
         reply_markup=get_output_format_kb()
     )
     await state.set_state(MinutesForm.in_output_format_select)
@@ -71,7 +71,7 @@ async def process_output_format(message: Message, state: FSMContext) -> None:
         logger.warning(
             "User `%s` choose incorrect format `%s`", message.from_user.username, output_format
         )
-        await message.reply("Пожалуйста укажите верный формат")
+        await message.reply("❌ Пожалуйста укажите верный формат!")
         await state.set_state(MinutesForm.in_output_format_select)
         return
     logger.info(
@@ -79,21 +79,24 @@ async def process_output_format(message: Message, state: FSMContext) -> None:
         message.from_user.username, output_format
     )
     data = await state.get_data()
-    await message.answer("Данные переданы ассистенту", reply_markup=ReplyKeyboardRemove())
     await create_task(
         user_id=message.from_user.id,
-        file_ids=[data["file_id"]],
+        file_id=data["file_id"],
         output_format=output_format,
+    )
+    await message.answer(
+        text="Аудио запись принята в работу, это может занять от 5 до 15 минут ⏳...",
+        reply_markup=ReplyKeyboardRemove(),
     )
 
 
 async def create_task(
-        user_id: int, file_ids: list[str], max_speakers: int = 10, output_format: str = "pdf"
+        user_id: int, file_id: str, max_speakers: int = 10, output_format: str = "pdf"
 ) -> None:
     """Создаёт асинхронную задачу на генерацию протокола совещания.
 
     :param user_id: Идентификатор пользователя в Telegram.
-    :param file_ids: Идентификаторы аудио файлов которые нужно протоколировать.
+    :param file_id: Идентификатор аудио файла который нужно протоколировать.
     :param max_speakers: Максимальное количество участников.
     :param output_format: Формат составленного документа с протоколом.
     """
@@ -101,16 +104,14 @@ async def create_task(
     from ..bot import bot  # noqa: PLC0415
     from ..broker import broker  # noqa: PLC0415
 
-    audio_paths: list[str] = []
-    for file_id in file_ids:
-        file = await bot.get_file(file_id, request_timeout=300)
-        file_format = file.file_path.split(".")[-1]
-        if file_format not in SUPPORTED_AUDIO_FORMATS:
-            logger.warning("Not supported audio format: %s!", file_format)
-            continue
-        audio_paths.append(file.file_path)
+    file = await bot.get_file(file_id, request_timeout=300)
+    file_format = file.file_path.split(".")[-1]
+    if file_format not in SUPPORTED_AUDIO_FORMATS:
+        logger.warning("Not supported audio format: %s!", file_format)
+        return
     task = MinutesTask.model_validate({
-        "audio_paths": audio_paths,
+        "audio_path": file.file_path,
+        "audio_format": file_format,
         "user_id": user_id,
         "max_speakers": max_speakers,
         "output_format": output_format,

@@ -50,5 +50,5 @@ async def authenticate(use_ssl: bool = False) -> str:
         logger.exception(error_message)
         raise AuthenticationError(error_message) from e
     else:
-        logger.info("Client successfully authenticated!")
+        logger.debug("Client successfully authenticated!")
         return access_token

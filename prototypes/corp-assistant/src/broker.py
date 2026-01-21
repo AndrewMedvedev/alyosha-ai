@@ -1,8 +1,8 @@
 import io
 import logging
+import time
 from collections.abc import Iterator
 
-import magic
 from aiogram import Bot
 from aiogram.types import BufferedInputFile, Message
 from faststream import FastStream, Logger
@@ -16,7 +16,7 @@ from pydub.utils import make_chunks
 from .core import schemas
 from .integrations import salute_speech
 from .settings import PROMPTS_DIR, settings
-from .utils import audio_mime_to_ext, current_datetime, md_to_pdf, progress_emojis
+from .utils import current_datetime, md_to_pdf, progress_emojis
 
 logger = logging.getLogger(__name__)
 
@@ -104,31 +104,29 @@ async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> Non
 
     bot_message = await bot.send_message(
         chat_id=task.user_id,
-        text="Начинаю обработку аудио записи, это может занять от 5 до 15 минут ⏳..."
+        text="Скачиваю аудио файл 🔜 ..."
     )
     transcription_segments: list[str] = []
-    for audio_path in task.audio_paths:
-        file_buffer = await bot.download_file(audio_path, destination=io.BytesIO())
-        audio_data = file_buffer.getbuffer().tobytes()
-        mime_type = magic.Magic(mime=True).from_buffer(audio_data)
-        for audio_segment in split_audio_into_segments(
-                audio_data, audio_format=audio_mime_to_ext(mime_type)
-        ):
-            bot_message = await update_progress(
-                bot=bot,
-                chat_id=task.user_id,
-                percent=audio_segment.index + 1 / audio_segment.segments_count,
-                prev_message_id=bot_message.message_id
-            )
-            logger.info(
-                "Recognizing %s segment of audio file %s", audio_segment.index + 1, audio_path
-            )
-            transcription = await salute_speech.recognize_async(
-                audio_data=audio_segment.data,
-                audio_encoding="PCM_S16LE",
-                max_speakers=task.max_speakers,
-            )
-            transcription_segments.append(transcription)
+    start_time = time.time()
+    file_buffer = await bot.download_file(task.audio_path, destination=io.BytesIO())
+    audio_data = file_buffer.getbuffer().tobytes()
+    for audio_segment in split_audio_into_segments(audio_data, audio_format=task.audio_format):
+        bot_message = await update_progress(
+            bot=bot,
+            chat_id=task.user_id,
+            percent=audio_segment.index + 1 / audio_segment.segments_count * 100,
+            prev_message_id=bot_message.message_id
+        )
+        logger.info(
+            "Recognizing %s/%s segment of audio file `%s`",
+            audio_segment.index + 1, audio_segment.segments_count, task.audio_path
+        )
+        transcription = await salute_speech.recognize_async(
+            audio_data=audio_segment.data,
+            audio_encoding="PCM_S16LE",
+            max_speakers=task.max_speakers,
+        )
+        transcription_segments.append(transcription)
     full_transcription = "\n".join(transcription_segments)
     await bot.delete_message(chat_id=task.user_id, message_id=bot_message.message_id)
     await bot.send_message(
@@ -136,6 +134,8 @@ async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> Non
         text="Всё распознано! 🎤\nФормирую протокол совещания… ✍️\nЭто займёт ещё 30–90 секунд",
     )
     md_content = await generate_meeting_minutes(full_transcription)
+    execution_time = time.time() - start_time
+    logger.info("Minutes of meeting completed, it took %s seconds", round(execution_time, 2))
     md_content = md_content.replace("```", "").replace("markdown", "")
     pdf_file = md_to_pdf(md_content)
     await bot.send_document(
@@ -143,5 +143,5 @@ async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> Non
             file=pdf_file,
             filename=f"Прокол_совещания_{current_datetime()}.pdf"
         ),
-        caption="Готово! 🎉"
+        caption="Ваш протокол совещания готов! 🎉"
     )
