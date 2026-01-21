@@ -64,7 +64,9 @@ async def upload_documents(request: Request, files: list[UploadFile] = File(...)
             status_code=status.HTTP_403_FORBIDDEN, detail="Admin required"
         )
     for file in files:
+        logger.info("Start indexing document: `%s`", file.filename)
         file_data = await file.read()
         file_extension = file.filename.split(".")[-1]
         md_content = convert_document_to_md(file_data, extension=f".{file_extension}")
         rag_pipeline.indexing(md_content, metadata={"source": file.filename})
+    logger.info("Finish indexing documents")
