@@ -53,7 +53,7 @@ def split_audio_into_segments(
     for i, chunk in enumerate(chunks):
         buffer = io.BytesIO()
         chunk.export(buffer, format="wav", bitrate="192k")
-        logger.info("Export %s segment data to WAV format", i)
+        logger.info("Export %s segment data to WAV format", i + 1)
         chunk_data = buffer.getvalue()
         yield schemas.AudioSegment(
             index=i,
@@ -110,6 +110,10 @@ async def process_minutes_task(task: schemas.MinutesTask, logger: Logger) -> Non
     start_time = time.time()
     file_buffer = await bot.download_file(task.audio_path, destination=io.BytesIO())
     audio_data = file_buffer.getbuffer().tobytes()
+    logger.info(
+        "Audio file `%s` downloaded from telegram, size %s mb, downloading time %s seconds",
+        task.audio_path, round(len(audio_data) / 1_000_000, 2), round(time.time() - start_time, 2)
+    )
     for audio_segment in split_audio_into_segments(audio_data, audio_format=task.audio_format):
         bot_message = await update_progress(
             bot=bot,
