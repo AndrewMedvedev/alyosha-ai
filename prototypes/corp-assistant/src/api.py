@@ -32,12 +32,14 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(lifespan=lifespan)
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
@@ -49,9 +51,9 @@ async def handle_aiogram_bot_update(request: Request) -> None:
 
 
 @app.post(
-    path="api/v1/documents/upload",
+    path="/api/v1/documents/upload",
     status_code=status.HTTP_201_CREATED,
-    summary="Загрузка документов в базу знаний"
+    summary="Загрузка документов в базу знаний",
 )
 async def upload_documents(request: Request, files: list[UploadFile] = File(...)) -> None:
     user_id = request.headers.get("X-User-ID")
@@ -60,9 +62,7 @@ async def upload_documents(request: Request, files: list[UploadFile] = File(...)
             status_code=status.HTTP_400_BAD_REQUEST, detail="Missing X-User-ID header"
         )
     if not is_admin(int(user_id)):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Admin required"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin required")
     for file in files:
         file_data = await file.read()
         file_extension = file.filename.split(".")[-1]

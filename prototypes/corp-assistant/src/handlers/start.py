@@ -4,11 +4,14 @@ from aiogram.types import Message
 
 from ..core import schemas
 from ..database import crud, models
-from ..keyboards import get_admin_menu_kb
+from ..keyboards import get_kb
 from ..service import is_admin
 from ..settings import settings
 
 router = Router(name=__name__)
+
+WEBAPP_URL = "https://9a56d20f142c.ngrok-free.app/static/prototype.html"
+
 
 WELCOME_MESSAGE = f"""Добрый день,
 я ваш корпоративный ассистент - <b>{settings.assistant.name}</b>.
@@ -30,7 +33,8 @@ async def cmd_start(message: Message) -> None:
                 role=schemas.UserRole.ADMIN,
             )
             await crud.create(admin, model_class=models.User)
-        await message.reply(WELCOME_MESSAGE, reply_markup=get_admin_menu_kb(user_id))
+        # await message.reply(WELCOME_MESSAGE, reply_markup=get_admin_menu_kb(user_id))
+        await message.reply(WELCOME_MESSAGE, reply_markup=get_kb(WEBAPP_URL))
         return
     user = await crud.read(user_id, model_class=models.User, schema_class=schemas.User)
     if user is None:

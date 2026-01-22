@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Загрузка документов</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📁 Загрузка документов</h1>
+        <p>Добавьте файлы для загрузки в базу знаний</p>
+      </div>
+
+      <div class="form-container">
+        <!-- Индикатор шагов -->
+        <div class="step-indicator">
+          <div class="step-line"></div>
+          <div class="step-line-fill" id="stepLineFill"></div>
+          <div class="step active" id="step1">1</div>
+          <div class="step" id="step2">2</div>
+        </div>
+
+        <!-- Сообщение об ошибке -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Шаг 1: Выбор файлов -->
+        <div class="step-content active" id="stepContent1">
+          <div class="upload-area" id="uploadArea">
+            <input type="file" id="fileInput" class="file-input" multiple />
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">Перетащите файлы сюда</div>
+            <div class="upload-subtext">или нажмите для выбора файлов</div>
+            <div class="upload-subtext">
+              Поддерживаемые форматы: PDF, DOCX, XLSX, PPTX (до 2 ГБ)
+            </div>
+          </div>
+
+          <div class="file-list" id="fileList">
+            <!-- Файлы будут появляться здесь -->
+          </div>
+
+          <div class="button-group">
+            <button
+              class="btn btn-primary"
+              id="uploadBtn"
+              onclick="uploadFiles()"
+              disabled
+            >
+              Загрузить файлы
+            </button>
+          </div>
+        </div>
+
+        <!-- Шаг 2: Загрузка и завершение -->
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+
+          <div class="success-message" id="successMessage">
+            <div class="success-icon">✓</div>
+            <h2 style="margin-bottom: 16px; color: #333">
+              ✅ Загрузка завершена!
+            </h2>
+            <p style="color: #666; margin-bottom: 24px">
+              Файлы успешно загружены в базу знаний
+            </p>
+            <button class="btn btn-secondary" onclick="resetForm()">
+              Загрузить ещё
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,428 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #361616 0%, #cf0b0b 100%);
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  max-width: 800px;
+  width: 100%;
+  background: linear-gradient(135deg, #c01313 0%, #491212 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* УБИРАЕМ ВСЕ ГРАНИЦЫ МЕЖДУ СЕКЦИЯМИ */
+.header {
+  background: transparent;
+  color: rgb(255, 255, 255);
+  padding: 40px 30px 20px 30px;
+  text-align: center;
+  border: none;
+}
+
+.header h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.header p {
+  opacity: 0.9;
+  font-size: 16px;
+}
+
+.form-container {
+  padding: 0 30px 30px 30px;
+  background: transparent;
+}
+
+/* Индикатор шагов */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 300px;
+  margin: 0 auto 40px;
+  position: relative;
+}
+
+.step-line {
+  position: absolute;
+  top: 15px;
+  left: 40px;
+  right: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 1;
+}
+
+.step-line-fill {
+  position: absolute;
+  top: 15px;
+  left: 40px;
+  height: 2px;
+  background: #4caf50;
+  z-index: 2;
+  width: 50%;
+  transition: width 0.3s ease;
+}
+
+.step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  position: relative;
+  z-index: 3;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  background: #4caf50;
+  color: white;
+}
+
+/* Область загрузки - ВСТРАИВАЕМ В ФОН */
+.upload-area {
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 50px 20px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.upload-area:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.upload-area.drag-over {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-color: #4caf50 !important;
+  transform: scale(1.02);
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.8;
+}
+
+.upload-text {
+  font-size: 20px;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.upload-subtext {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+.file-input {
+  display: none;
+}
+
+/* Стили для списка файлов */
+.file-list {
+  display: none;
+  margin-top: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease;
+}
+
+.file-item:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.file-item:last-child {
+  border-bottom: none;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 15px;
+  color: white;
+  margin-bottom: 5px;
+  word-break: break-all;
+  font-weight: 500;
+}
+
+.file-size {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.remove-btn {
+  background: rgba(255, 68, 68, 0.8);
+  color: white;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 15px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+  background: #cc0000;
+  transform: scale(1.1);
+}
+
+/* Кнопки */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2be021 0%, #1f8418 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(43, 224, 33, 0.4);
+}
+
+.btn-primary:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Контейнер прогресса */
+.progress-container {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.progress-container.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  margin: 40px 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  border-radius: 5px;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+/* Сообщение об успехе */
+.success-message {
+  display: none;
+  animation: fadeIn 0.5s ease 0.3s both;
+  color: white;
+}
+
+.success-icon {
+  font-size: 72px;
+  color: #4caf50;
+  margin-bottom: 25px;
+  animation: bounceIn 0.5s ease;
+}
+
+/* Сообщение об ошибке */
+.error-message {
+  display: none;
+  background: rgba(255, 107, 107, 0.9);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  font-size: 15px;
+  animation: slideDown 0.3s ease;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Контент шагов */
+.step-content {
+  display: none;
+}
+
+.step-content.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .container {
+    margin: 10px;
+    border-radius: 15px;
+  }
+
+  .header {
+    padding: 30px 20px 15px 20px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .form-container {
+    padding: 0 20px 25px 20px;
+  }
+
+  .upload-area {
+    padding: 40px 15px;
+  }
+
+  .upload-text {
+    font-size: 18px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    min-width: 150px;
+    font-size: 15px;
+  }
+
+  .button-group {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Скроллбар */
+.file-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.file-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.file-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

@@ -1,8 +1,18 @@
 import logging
+from pathlib import Path
 
 import uvicorn
+from fastapi.staticfiles import StaticFiles
 
 from src.api import app
+
+BASE_DIR = Path(__file__).resolve().parent
+
+app.mount(
+    "/static",
+    StaticFiles(directory=BASE_DIR / "static"),
+    name="static",
+)
 
 
 def configure_logging(level=logging.INFO):
