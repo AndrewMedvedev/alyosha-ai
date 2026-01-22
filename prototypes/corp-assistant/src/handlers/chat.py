@@ -10,9 +10,7 @@ router = Router(name=__name__)
 
 @router.message(F.text)
 async def handle_message(message: Message) -> None:
-    from ..bot import bot  # noqa: PLC0415
-
-    async with ChatActionSender.typing(chat_id=message.chat.id, bot=bot):
+    async with ChatActionSender.typing(chat_id=message.chat.id, bot=message.bot):
         ai_content = await call_agent(
             message_text=message.text,
             context=Context(

@@ -119,7 +119,10 @@ async def _upload_file(
     }
     url = f"{BASE_URL}data:upload"
     try:
-        logger.info("Start uploading file to Salute Speech with encoding %s", audio_encoding)
+        logger.info(
+            "Start uploading file %s mb to Salute Speech with encoding %s",
+            round(len(data) / 1_000_000, 2), audio_encoding
+        )
         async with aiohttp.ClientSession() as session, session.post(
                 url=url, headers=headers, data=data, ssl=use_ssl
         ) as response:
