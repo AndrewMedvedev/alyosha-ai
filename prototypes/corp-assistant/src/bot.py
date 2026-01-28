@@ -8,9 +8,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from .handlers import router
 from .settings import settings
 
-session = AiohttpSession(
-    api=TelegramAPIServer.from_base(settings.telegram.api_url, is_local=True)
-)
+session = AiohttpSession(api=TelegramAPIServer.from_base(settings.telegram.api_url, is_local=True))
 
 bot = Bot(
     token=settings.telegram.bot_token,

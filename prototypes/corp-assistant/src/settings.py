@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 ENV_PATH = PROJECT_ROOT / ".env"
 CHROMA_PATH = PROJECT_ROOT / ".chroma"
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(ENV_PATH)
 
@@ -82,7 +83,7 @@ class RedisSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="REDIS_")
 
     host: str = "redis"
-    port: str = 6379
+    port: str = "6379"
 
     @property
     def url(self) -> str:
@@ -100,6 +101,7 @@ class AssistantSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+    base_url: str = ""
     telegram: TelegramSettings = TelegramSettings()
     yandexcloud: YandexCloudSettings = YandexCloudSettings()
     sber_devices: SberDevicesSettings = SberDevicesSettings()

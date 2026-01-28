@@ -9,7 +9,7 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2ГБ
 const SUPPORTED_EXTENSIONS = ["pdf", "docx", "xlsx", "pptx"];
 // Укажите полный URL вашего бэкенда
 const API_ENDPOINT =
-  "https://9a56d20f142c.ngrok-free.app/api/v1/documents/upload";
+  "/api/v1/documents/upload";
 
 // Элементы DOM
 const step1 = document.getElementById("step1");
@@ -77,6 +77,7 @@ function handleFileSelect(e) {
 }
 
 // Основная обработка файлов
+// Основная обработка файлов
 function handleFiles(files) {
   errorMessage.style.display = "none";
   errorMessage.textContent = "";
@@ -97,7 +98,10 @@ function handleFiles(files) {
 
     // Проверка размера
     if (file.size > MAX_FILE_SIZE) {
-      errors.push(`"${file.name}" - превышает 2 ГБ`);
+      // Форматируем максимальный размер для сообщения об ошибке
+      const maxSizeGB = (MAX_FILE_SIZE / (1024 * 1024 * 1024)).toFixed(0);
+      const fileSizeGB = (file.size / (1024 * 1024 * 1024)).toFixed(2);
+      errors.push(`"${file.name}" - ${fileSizeGB} ГБ (максимум ${maxSizeGB} ГБ)`);
       return;
     }
 
@@ -126,6 +130,7 @@ function handleFiles(files) {
 }
 
 // Отображение списка файлов
+// Отображение списка файлов
 function renderFileList() {
   fileList.innerHTML = "";
 
@@ -140,12 +145,23 @@ function renderFileList() {
     const fileElement = document.createElement("div");
     fileElement.className = "file-item";
 
-    const sizeGB = (file.size / (1024 * 1024 * 1024)).toFixed(2);
+    // Форматируем размер файла в подходящих единицах
+    let sizeText;
+    const fileSizeInMB = file.size / (1024 * 1024);
+    const fileSizeInGB = file.size / (1024 * 1024 * 1024);
+
+    // Если размер меньше 1 ГБ, показываем в МБ
+    if (fileSizeInGB < 1) {
+      sizeText = `${fileSizeInMB.toFixed(2)} МБ`;
+    } else {
+      // Если 1 ГБ или больше, показываем в ГБ
+      sizeText = `${fileSizeInGB.toFixed(2)} ГБ`;
+    }
 
     fileElement.innerHTML = `
           <div class="file-info">
             <div class="file-name">${escapeHtml(file.name)}</div>
-            <div class="file-size">${sizeGB} ГБ</div>
+            <div class="file-size">${sizeText}</div>
           </div>
           <button class="remove-btn" onclick="removeFile(${index})" title="Удалить">×</button>
         `;
@@ -274,7 +290,7 @@ async function uploadFiles() {
 
     showError(
       error.message ||
-        "Произошла ошибка при загрузке файлов. Проверьте подключение к интернету.",
+      "Произошла ошибка при загрузке файлов. Проверьте подключение к интернету.",
     );
   }
 }

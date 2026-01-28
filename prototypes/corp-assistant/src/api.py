@@ -5,11 +5,13 @@ from contextlib import asynccontextmanager
 from aiogram.types import Update
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .bot import bot, dp
 from .broker import app as faststream_app
 from .rag import rag_pipeline
 from .service import is_admin
+from .settings import BASE_DIR
 from .utils import convert_document_to_md
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ WEBHOOK_URL = "http://localhost:8000/hook"
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    await faststream_app.broker.start()
+    await faststream_app.broker.start()  # type: ignore
     await bot.set_webhook(
         url=WEBHOOK_URL, allowed_updates=dp.resolve_used_update_types(), drop_pending_updates=True
     )
@@ -27,10 +29,16 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
     await bot.delete_webhook()
     logger.info("Telegram Bot webhook removed")
-    await faststream_app.broker.stop()
+    await faststream_app.broker.stop()  # type: ignore
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.mount(
+    "/static",
+    StaticFiles(directory=BASE_DIR / "static"),
+    name="static",
+)
 
 
 app.add_middleware(

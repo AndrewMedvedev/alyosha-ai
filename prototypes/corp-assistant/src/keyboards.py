@@ -14,21 +14,11 @@ class AdminMenuCBData(CallbackData, prefix="admin_menu"):
     action: AdminAction
 
 
-def get_admin_menu_kb(user_id: int) -> InlineKeyboardMarkup:
+def get_admin_menu_kb(webapp_url: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="💾 Загрузить документы",
-        callback_data=AdminMenuCBData(user_id=user_id, action=AdminAction.UPLOAD_DOCUMENTS).pack(),
+        web_app=WebAppInfo(url=webapp_url),
     )
-    builder.adjust(1)
-    return builder.as_markup()
-
-
-def get_kb(webapp_url: str) -> InlineKeyboardMarkup:
-    """Клавиатура только с кнопкой WebApp"""
-    builder = InlineKeyboardBuilder()
-
-    builder.button(text="💾 Загрузить документы", web_app=WebAppInfo(url=webapp_url))
-
     builder.adjust(1)
     return builder.as_markup()
